@@ -4,12 +4,18 @@ from pydantic import BaseModel, EmailStr
 
 
 class UserBase(BaseModel):
-	full_name: Optional[str] = None
+	name: Optional[str] = None
 	email: Optional[EmailStr] = None
-	is_active: Optional[bool] = False
-	is_admin: bool = False
 
 
 class UserCreate(UserBase):
 	email: EmailStr
 	password: str
+
+
+class UserFull(BaseModel):
+	is_active: Optional[bool] = False
+	is_admin: Optional[bool] = False
+
+
+
