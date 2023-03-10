@@ -14,11 +14,6 @@ class User(Base):
 	is_active = Column(Boolean, default=False)
 	is_admin = Column(Boolean, default=False)
 
-	# def __init__(self, user_data: UserCreate):
-	# 	self.full_name = user_data.name
-	# 	self.email = user_data.email
-	# 	self.hashed_password = bytes(user_data.password, 'utf-8')
-
 
 
 class RefreshToken(Base):

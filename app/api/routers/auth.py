@@ -18,6 +18,6 @@ async def root(user_data: UserCreate,  repo: SQLAlchemyRepo = Depends(get_repo))
 		raise HTTPException(status_code=400,
 		                    detail="The user with this username already exists")
 
-	user: UserFull = await repo.get_repo(UserRepo).user_registration(user_data=user_data)
+	user: UserFull = await repo.get_repo(UserRepo).user_add(user_data=user_data)
 	return user
 
