@@ -1,25 +1,26 @@
+from sqlalchemy import select
+
 from app.repo.base import BaseSQLAlchemyRepo
 from app.db.models import User
-from app.schemas.user import UserCreate, UserFull
-
-from sqlalchemy import select
+from app.schemas.user import UserCreate, User
+from app.services.security import crypt_password
 
 
 class UserRepo(BaseSQLAlchemyRepo):
-    async def user_add(self, user_data: UserCreate) -> UserFull:
+    async def user_add(self, user_data: UserCreate) -> User:
         """
         Add user to database
         :param user_data: app.schemas.user.UserCreate
         :return: app.schemas.user.User
         """
-        user = await self._session.merge(User(full_name=user_data.full_name,
-                                              email=user_data.email,
-                                              hashed_password=bytes(user_data.password, 'utf-8')))
+        user = await self._session.merge(
+            User(full_name=user_data.full_name, email=user_data.email,
+                 hashed_password=crypt_password(user_data.password)))
 
         await self._session.commit()
         return user
 
-    async def get_by_email(self, email: str) -> UserFull:
+    async def get_by_email(self, email: str) -> User:
         """
         Get user from database by email
         :param email:
