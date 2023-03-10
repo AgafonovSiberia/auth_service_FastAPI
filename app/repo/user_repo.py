@@ -10,9 +10,9 @@ class UserRepo(BaseSQLAlchemyRepo):
         """
         Add user to database
         :param user_data: app.schemas.user.UserCreate
-        :return: app.schemas.user.UserFull
+        :return: app.schemas.user.User
         """
-        user = await self._session.merge(User(full_name=user_data.name,
+        user = await self._session.merge(User(full_name=user_data.full_name,
                                               email=user_data.email,
                                               hashed_password=bytes(user_data.password, 'utf-8')))
 
@@ -23,7 +23,7 @@ class UserRepo(BaseSQLAlchemyRepo):
         """
         Get user from database by email
         :param email:
-        :return: app.schemas.user.UserFull
+        :return: app.schemas.user.User
         """
         user = await self._session.execute(select(User).where(User.email == email))
         return user.first()

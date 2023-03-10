@@ -4,7 +4,7 @@ from pydantic import BaseModel, EmailStr
 
 
 class UserBase(BaseModel):
-	name: Optional[str] = None
+	full_name: Optional[str] = None
 	email: Optional[EmailStr] = None
 
 
@@ -13,9 +13,20 @@ class UserCreate(UserBase):
 	password: str
 
 
-class UserFull(BaseModel):
+class UserFull(UserBase):
 	is_active: Optional[bool] = False
 	is_admin: Optional[bool] = False
+
+
+class UserFromDB(UserFull):
+	id: Optional[int] = None
+
+	class Config:
+		orm_mode = True
+
+
+class User(UserFromDB):
+	pass
 
 
 
