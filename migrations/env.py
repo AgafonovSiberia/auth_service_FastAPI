@@ -16,9 +16,16 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = None
+
+from app.db.models import Base
+target_metadata = Base.metadata
+from app.config_reader import config as app_config
+
+config.set_main_option(
+    'sqlalchemy.url',
+    app_config.POSTGRES_URL + "?async_fallback=True"
+)
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

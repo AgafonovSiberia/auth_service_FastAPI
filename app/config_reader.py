@@ -6,9 +6,9 @@ from pydantic import BaseSettings, Field, PostgresDsn, validator
 class Settings(BaseSettings):
     API_V1_URL: str = "/api/v1"
 
-    POSTGRES_USER: str = Field(default="user")
-    POSTGRES_PASSWORD: str = Field(default="postgres_password")
-    POSTGRES_DB: str = Field(default="database")
+    POSTGRES_USER: str = Field(default="admin")
+    POSTGRES_PASSWORD: str = Field(default="qwerty123")
+    POSTGRES_DB: str = Field(default="auth_service")
     POSTGRES_HOST: str = Field(default="db")
     POSTGRES_PORT: str = Field(default="5432")
 
