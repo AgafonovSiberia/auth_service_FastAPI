@@ -14,6 +14,9 @@ class Settings(BaseSettings):
 
     POSTGRES_URL: Optional[PostgresDsn] = None
 
+    TTL_ACCESS_TOKEN: int = Field(default=30)
+    TTL_REFRESH_TOKEN: int = Field(default=60)
+
     @validator("POSTGRES_URL", pre=True)
     def assemble_celery_dburi(cls, v: Optional[str], values: [str, Any]) -> Any:
         if isinstance(v, str):

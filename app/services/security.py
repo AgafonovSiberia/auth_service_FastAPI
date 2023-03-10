@@ -1,8 +1,8 @@
 import datetime
-
-import jwt
 from calendar import timegm
-from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, DecodeError
+
+import bcrypt
+import jwt
 
 from app.config_reader import config
 
@@ -10,8 +10,32 @@ TTL_AT = config.TTL_ACCESS_TOKEN
 TTL_RT = config.TTL_REFRESH_TOKEN
 
 
-async def create_token(user_id: int, type_token: str):
-    """Создание access/refresh-token"""
+def crypt_password(password: str) -> str:
+    """
+    Password crypt
+    :param password: row password
+    :return: hashed password
+    """
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+
+
+def check_password(password: str, hash_password: str) -> bool:
+    """
+    Password validator
+    :param password: row password string
+    :param hash_password: hashed password string
+    :return: True if password is valid else False
+    """
+    return bcrypt.checkpw(password.encode(), hash_password)
+
+
+def create_token(user_id: int, type_token: str):
+    """
+    Create JWT-token
+    :param user_id:
+    :param type_token: "access" | "refresh"
+    :return: (jwt-token string, datetime it token expires)
+    """
     exp = timegm(
         (
             datetime.datetime.now(tz=datetime.timezone.utc)

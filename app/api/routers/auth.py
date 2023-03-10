@@ -1,14 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException
+
 from app.schemas.user import UserCreate, UserFull
 from app.repo.base import SQLAlchemyRepo
-from app.services.depends import get_repo
 from app.repo.user_repo import UserRepo
+
+from app.services.depends import get_repo
+
 
 
 router = APIRouter()
 
 
-@router.post("/signup/", response_model=UserFull)
+@router.post("/signup/")
 async def root(user_data: UserCreate,  repo: SQLAlchemyRepo = Depends(get_repo)):
 	user = await repo.get_repo(UserRepo).get_by_email(email=user_data.email)
 	if user:
