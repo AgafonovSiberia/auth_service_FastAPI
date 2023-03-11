@@ -1,2 +1,2 @@
 from .base import BaseSQLAlchemyRepo
-from .repository import SQLAlchemyRepo
+from .repository import Repository

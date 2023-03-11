@@ -1,13 +1,13 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from app.repo.base import BaseSQLAlchemyRepo
 from app.db.models import User
-from app.schemas.user import UserCreate, User
+from app.schemas.user import UserCreate, UserFromDB
 from app.services.security import crypt_password
 
 
 class UserRepo(BaseSQLAlchemyRepo):
-    async def user_add(self, user_data: UserCreate) -> User:
+    async def user_add(self, user_data: UserCreate) -> UserFromDB:
         """
         Add user to database
         :param user_data: app.schemas.user.UserCreate
@@ -20,7 +20,14 @@ class UserRepo(BaseSQLAlchemyRepo):
         await self._session.commit()
         return user
 
-    async def get_by_email(self, email: str) -> User:
+
+    async def activate_account(self, activate_code: str) -> UserFromDB:
+        pass
+
+
+
+
+    async def get_by_email(self, email: str) -> UserFromDB:
         """
         Get user from database by email
         :param email:

@@ -8,7 +8,7 @@ from app.repo.base.base import BaseSQLAlchemyRepo
 T = TypeVar("T", bound=BaseSQLAlchemyRepo)
 
 
-class SQLAlchemyRepo:
+class Repository:
     def __init__(self, session: AsyncSession):
         self._session = session
 
