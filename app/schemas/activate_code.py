@@ -12,3 +12,8 @@ class ActivateCode(CodeBase):
 
     class Config:
         orm_mode = True
+
+
+class ActivateUser(BaseModel):
+    id: int
+    code: int
