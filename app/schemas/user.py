@@ -1,15 +1,16 @@
 
-from typing import Optional
+from typing import Optional, Union
 from pydantic import BaseModel, EmailStr
+from app.schemas.validator import PhoneNumber
 
 
 class UserBase(BaseModel):
 	full_name: Optional[str] = None
-	email: Optional[EmailStr] = None
+	login: Union[EmailStr, PhoneNumber, None] = None
 
 
 class UserCreate(UserBase):
-	email: EmailStr
+	login: Union[EmailStr, PhoneNumber, None]
 	password: str
 
 

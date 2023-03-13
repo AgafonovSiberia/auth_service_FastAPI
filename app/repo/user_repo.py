@@ -1,7 +1,9 @@
+import datetime
+
 from sqlalchemy import select, update
 
 from app.repo.base import BaseSQLAlchemyRepo
-from app.db.models import User
+from app.db.models import User, ActivateCode
 from app.schemas.user import UserCreate, UserFromDB
 from app.services.security import crypt_password
 
@@ -14,25 +16,32 @@ class UserRepo(BaseSQLAlchemyRepo):
         :return: app.schemas.user.User
         """
         user = await self._session.merge(
-            User(full_name=user_data.full_name, email=user_data.email,
+            User(full_name=user_data.full_name, login=user_data.login,
                  hashed_password=crypt_password(user_data.password)))
 
         await self._session.commit()
         return user
 
-
     async def activate_account(self, activate_code: str) -> UserFromDB:
         pass
 
-
-
-
-    async def get_by_email(self, email: str) -> UserFromDB:
+    async def get_by_email(self, login: str) -> UserFromDB:
         """
         Get user from database by email
-        :param email:
+        :param login: логин пользователя (email / номер телефона)
         :return: app.schemas.user.User
         """
-        user = await self._session.execute(select(User).where(User.email == email))
+        user = await self._session.execute(select(User).where(User.login == login))
         return user.first()
 
+    async def add_code_activate(self, user_id: int, code_activate: int, expire: int):
+        code = await self._session.merge(ActivateCode(user_id=user_id,
+                                              code=code_activate,
+                                              expire=expire))
+        await self._session.commit()
+        return code
+
+    async def check_activate_code(self, user_id: int):
+        code = await self._session.execute(select(ActivateCode).
+                                           where(ActivateCode.expire > datetime.datetime.now().timestamp()))
+        return code.first()
