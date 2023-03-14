@@ -1,6 +1,5 @@
 
 import datetime
-
 from fastapi import (APIRouter, Depends,
                      HTTPException)
 from fastapi.responses import JSONResponse
@@ -8,7 +7,7 @@ from app.repo.base import Repository
 from app.repo.user_repo import UserRepo
 from app.schemas.user import UserCreate, UserFromDB
 from app.schemas.activate_code import ActivateCode, ActivateUser
-from app.services.depends import get_repo
+from app.db.engine import get_repo
 from app.utils.activate_code import generate_activate_code
 
 
