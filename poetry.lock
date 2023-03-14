@@ -312,6 +312,24 @@ files = [
 ]
 
 [[package]]
+name = "jinja2"
+version = "3.1.2"
+description = "A very fast and expressive template engine."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "Jinja2-3.1.2-py3-none-any.whl", hash = "sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61"},
+    {file = "Jinja2-3.1.2.tar.gz", hash = "sha256:31351a702a408a9e7595a8fc6150fc3f43bb6bf7e319770cbc0db9df9437e852"},
+]
+
+[package.dependencies]
+MarkupSafe = ">=2.0"
+
+[package.extras]
+i18n = ["Babel (>=2.7)"]
+
+[[package]]
 name = "mako"
 version = "1.2.4"
 description = "A super-fast templating language that borrows the best ideas from the existing templating languages."
@@ -478,19 +496,24 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
-name = "redbox"
-version = "0.2.1"
-description = "Email box reading library"
+name = "redmail"
+version = "0.6.0"
+description = "Email sending library"
 category = "main"
 optional = false
-python-versions = ">=3.6.0"
+python-versions = ">=3.6"
 files = [
-    {file = "redbox-0.2.1-py3-none-any.whl", hash = "sha256:14906668345c7e76db367d6d40347c2dcb5de2a5167f96d08f06f95c0a908f71"},
-    {file = "redbox-0.2.1.tar.gz", hash = "sha256:17005f8cfe8acba992b649e5682b2dd4bff937d67df3fd8496e187cae4f19d60"},
+    {file = "redmail-0.6.0-py3-none-any.whl", hash = "sha256:8e64a680ffc8aaf8054312bf8b216da8fed20669181b77b1f1ccbdf4ee064427"},
+    {file = "redmail-0.6.0.tar.gz", hash = "sha256:0447cbd76deb2788b2d831c12e22b513587e99f725071d9951a01b0f2b8d0a72"},
 ]
 
 [package.dependencies]
-pydantic = "*"
+jinja2 = "*"
+
+[package.extras]
+docs = ["pydata-sphinx-theme", "sphinx (>=1.7.5)", "sphinx-book-theme", "sphinx-copybutton", "sphinx-material"]
+style = ["css-inline"]
+test = ["Pillow", "css-inline", "jinja2", "matplotlib", "openpyxl", "pandas", "pytest"]
 
 [[package]]
 name = "sniffio"
@@ -634,4 +657,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "eaa930f70c5d8c3aebd2abe66e607dd0958cda33e5cde6f5edfbe78c086cdfba"
+content-hash = "aeb3b61b552bad1db14dfc3ab7b6a56581fc20224fa2fa91a4e360eedbc4592d"
