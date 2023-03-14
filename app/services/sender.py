@@ -5,26 +5,19 @@ import re
 
 from email_validator import validate_email, EmailNotValidError
 
-class CodeSender(ABC):
-    message_to: str = None
 
-    @abstractmethod
-    def send_message(self, message: EmailSender | str):
-        raise NotImplementedError
-
-
-class SMSCodeSender(CodeSender):
+class SMSCodeSender:
     def send_message(self, message):
         pass
 
 
 class EmailCodeSender:
     def __init__(self):
-        self.email = EmailSender(host=config.EMAIL.HOST,
-                                 port=config.EMAIL.PORT,
-                                 use_tls=config.EMAIL.USE_TLS,
-                                 username=config.EMAIL.LOGIN,
-                                 password=config.EMAIL.PASSWORD)
+        self.email = EmailSender(host=config.email.host,
+                                 port=config.email.port,
+                                 use_starttls=config.email.use_tls,
+                                 username=config.email.login,
+                                 password=config.email.password)
 
     def send_email(self,
                    subject: str,
@@ -41,23 +34,24 @@ class EmailCodeSender:
         )
 
     def _set_template(self):
-        self.email.set_template_paths(config.EMAIL.TEMPLATE_PATH)
+        self.email.set_template_paths(config.email.template_path)
 
 
 class CodeSender:
-    def __init__(self, subject: str, address_to: str,code: int):
+    def __init__(self, subject: str, address_to: str, code: int):
         self.subject = subject
         self.address_to = address_to
         self.code = code
+        print(subject)
 
     def send(self):
-        if self._is_email(self.address_to):
+        if self._is_email():
             sender = EmailCodeSender()
             sender.send_email(email_to=self.address_to,
                               **self._get_data_to_email(),
                               body_params={"login": self.address_to, "code": self.code})
 
-        if self._is_phone_number(self.address_to):
+        if self._is_phone_number():
             pass
 
     def _get_data_to_email(self):

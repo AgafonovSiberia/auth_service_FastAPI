@@ -1,9 +1,22 @@
 
-from typing import Optional, Any
-from pydantic import BaseSettings, Field, PostgresDsn, validator
+from typing import Optional, Any, Dict
+from pydantic import (BaseModel, BaseSettings, Field, PostgresDsn, RedisDsn, validator)
+
+
+class Email(BaseModel):
+    provider: str
+    host: str
+    port: int
+    login: str
+    password: str
+    use_tls: bool
+
+    template_path: str
 
 
 class Settings(BaseSettings):
+    email: Email
+
     API_V1_URL: str = "/api/v1"
 
     POSTGRES_USER: str = Field(default="admin")
@@ -20,7 +33,7 @@ class Settings(BaseSettings):
     TTL_CODE_ACTIVATE: int = Field(default=30)
 
     @validator("POSTGRES_URL", pre=True)
-    def assemble_celery_dburi(cls, v: Optional[str], values: [str, Any]) -> Any:
+    def assemble_postgres_uri(cls, v: Optional[str], values: [str, Any]) -> Any:
         if isinstance(v, str):
             return v
         return PostgresDsn.build(
@@ -32,6 +45,21 @@ class Settings(BaseSettings):
             port=f"{values.get('POSTGRES_PORT') or ''}",
         )
 
+    REDIS_HOST: str = Field(default="127.0.0.1")
+    REDIS_PORT: int = Field(default=6379)
+
+    REDIS_URL: Optional[RedisDsn] = None
+
+    @validator("REDIS_URL", pre=True)
+    def assemble_redis_uri(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
+        if isinstance(v, str):
+            return v
+        return RedisDsn.build(
+            scheme="redis",
+            host=values.get("REDIS_HOST"),
+            port=str(values.get("REDIS_PORT")),
+            path="/0",
+        )
 
     class Config:
         env_file = './dev.env'
