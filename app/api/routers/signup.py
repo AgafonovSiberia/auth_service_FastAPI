@@ -60,5 +60,5 @@ async def get_activate_code(user_id: int, repo: Repository = Depends(get_repo)):
                                                                          code_activate=activate_code,
                                                                          expire=exp_time)
 
-    send_message_with_code(subject="activate", address_to=user.login, code=code.code).delay()
+    send_message_with_code.delay(subject="activate", address_to=user.login, code=code.code)
     return JSONResponse(status_code=200, content={"message": "User account successfully activated"})
