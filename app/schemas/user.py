@@ -25,9 +25,3 @@ class UserFromDB(UserFull):
 	class Config:
 		orm_mode = True
 
-
-class User(UserFromDB):
-	pass
-
-
-

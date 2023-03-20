@@ -36,11 +36,11 @@ class UserRepo(BaseSQLAlchemyRepo):
         :return: app.schemas.user.User
         """
         user = await self._session.execute(select(User).where(User.login == login))
-        return user.first()
+        return user.scalar_one_or_none()
 
     async def get_by_id(self, user_id: int) -> UserFromDB:
         user = await self._session.execute(select(User).where(User.id == user_id))
-        return user.first()
+        return user.scalar_one_or_none()
 
     async def add_code_activate(self, user_id: int, code_activate: int, expire: int):
         code = await self._session.merge(ActivateCode(user_id=user_id,

@@ -8,7 +8,9 @@ from app.repo.user_repo import UserRepo
 from app.schemas.user import UserCreate, UserFromDB
 from app.schemas.activate_code import ActivateCode, ActivateUser
 from app.db.engine import get_repo
+from app.services.sender import CodeSender
 from app.utils.activate_code import generate_activate_code
+from app.services.workflow.tasks.send_tasks import send_message_with_code
 
 
 from app.config_reader import config
@@ -38,6 +40,7 @@ async def activate_account(activate_data: ActivateUser, repo: Repository = Depen
     if not code:
         raise HTTPException(status_code=400, detail="This code has expired")
     user: UserFromDB = await repo.get_repo(UserRepo).activate_user(user_id=activate_data.id)
+
     return user
 
 
@@ -56,8 +59,6 @@ async def get_activate_code(user_id: int, repo: Repository = Depends(get_repo)):
     code: ActivateCode = await repo.get_repo(UserRepo).add_code_activate(user_id=user_id,
                                                                          code_activate=activate_code,
                                                                          expire=exp_time)
-    # на время тестирования отдаём код активации
-    return JSONResponse(content={"code": code.code, "code_expire": code.expire})
-    # return JSONResponse(status_code=200, content={"message": "User account successfully activated"})
 
-
+    send_message_with_code(subject="activate", address_to=user.login, code=code.code).delay()
+    return JSONResponse(status_code=200, content={"message": "User account successfully activated"})
