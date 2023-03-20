@@ -2,11 +2,10 @@ import datetime
 
 from sqlalchemy import select, update
 
-
-from app.repo.base import BaseSQLAlchemyRepo
 from app.db.models import User, ActivateCode
 from app.schemas.user import UserCreate, UserFromDB
 from app.services.security import crypt_password
+from app.repo.base.base import BaseSQLAlchemyRepo
 
 
 class UserRepo(BaseSQLAlchemyRepo):
@@ -17,15 +16,26 @@ class UserRepo(BaseSQLAlchemyRepo):
         :return: app.schemas.user.User
         """
         user = await self._session.merge(
-            User(full_name=user_data.full_name, login=user_data.login,
-                 hashed_password=crypt_password(user_data.password)))
+            User(
+                full_name=user_data.full_name,
+                login=user_data.login,
+                hashed_password=crypt_password(user_data.password),
+            )
+        )
 
         await self._session.commit()
         return user
 
     async def activate_user(self, user_id: int) -> UserFromDB:
-        query = (update(User).where(User.id == user_id).values(is_active=True).returning(User))
-        user = select(User).from_statement(query).execution_options(populate_existing=True)
+        query = (
+            update(User)
+            .where(User.id == user_id)
+            .values(is_active=True)
+            .returning(User)
+        )
+        user = (
+            select(User).from_statement(query).execution_options(populate_existing=True)
+        )
         await self._session.commit()
         return user
 
@@ -43,21 +53,27 @@ class UserRepo(BaseSQLAlchemyRepo):
         return user.scalar_one_or_none()
 
     async def add_code_activate(self, user_id: int, code_activate: int, expire: int):
-        code = await self._session.merge(ActivateCode(user_id=user_id,
-                                                      code=code_activate,
-                                                      expire=expire))
+        code = await self._session.merge(
+            ActivateCode(user_id=user_id, code=code_activate, expire=expire)
+        )
         await self._session.commit()
         return code
 
     async def check_activate_code_by_user_id(self, user_id: int):
-        code = await self._session.execute(select(ActivateCode).
-                                           where(ActivateCode.expire > datetime.datetime.
-                                                 now(tz=datetime.timezone.utc).timestamp()).
-                                           where(ActivateCode.user_id == user_id))
+        code = await self._session.execute(
+            select(ActivateCode)
+            .where(
+                ActivateCode.expire
+                > datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
+            )
+            .where(ActivateCode.user_id == user_id)
+        )
         return code.first()
 
     async def check_activate_code_by_code(self, code: int):
-        code = await self._session.execute(select(ActivateCode).
-                                           where(ActivateCode.expire > datetime.datetime.now().timestamp()).
-                                           where(ActivateCode.code == code))
+        code = await self._session.execute(
+            select(ActivateCode)
+            .where(ActivateCode.expire > datetime.datetime.now().timestamp())
+            .where(ActivateCode.code == code)
+        )
         return code.first()

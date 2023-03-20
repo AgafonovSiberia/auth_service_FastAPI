@@ -1,6 +1,5 @@
-
 from typing import Optional, Any, Dict
-from pydantic import (BaseModel, BaseSettings, Field, PostgresDsn, RedisDsn, validator)
+from pydantic import BaseModel, BaseSettings, Field, PostgresDsn, RedisDsn, validator
 
 
 class Email(BaseModel):
@@ -62,10 +61,9 @@ class Settings(BaseSettings):
         )
 
     class Config:
-        env_file = './dev.env'
-        env_file_encoding = 'utf-8'
-        env_nested_delimiter = '__'
+        env_file = "./dev.env"
+        env_file_encoding = "utf-8"
+        env_nested_delimiter = "__"
 
 
 config = Settings()
-

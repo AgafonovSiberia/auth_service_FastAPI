@@ -1,28 +1,19 @@
-from typing import Generator
-
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import (
+    create_async_engine,
+    AsyncSession,
+    async_sessionmaker,
+    AsyncEngine,
+)
 from app.config_reader import config
-from app.repo.base import Repository
 
 
-def get_session_factory():
-	"""
-	Create SQLAlchemy async engine
-	:return: sqlalchemy.ext.asyncio.AsyncSession
-	"""
-	engine = create_async_engine(config.POSTGRES_URL, pool_pre_ping=True, echo=True)
-	return sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+def create_pool() -> async_sessionmaker[AsyncSession]:
+    engine = create_async_engine(config.POSTGRES_URL, pool_pre_ping=True, echo=True)
+    return create_session_maker(engine)
 
 
-async def get_repo() -> Generator[Repository, None, None]:
-	"""
-	Create SQLAlchemyRepo
-	:return: SQLAlchemyRepo
-	"""
-	_session: AsyncSession = get_session_factory()()
-	try:
-		repo: Repository = Repository(_session)
-		yield repo
-	finally:
-		await _session.close()
+def create_session_maker(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
+    pool: async_sessionmaker[AsyncSession] = async_sessionmaker(
+        bind=engine, expire_on_commit=False, autoflush=False
+    )
+    return pool

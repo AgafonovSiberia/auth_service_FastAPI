@@ -17,4 +17,6 @@ WORKDIR $CODE_PATH
 
 COPY .. .
 
+ENTRYPOINT ["python3", "-m", "app.main"]
+
 
