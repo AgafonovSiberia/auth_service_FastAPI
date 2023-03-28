@@ -1,12 +1,12 @@
 run:
-	docker-compose up --build
+	docker compose up --build
 
 stop:
-	docker-compose stop
+	docker compose stop
 
 
 clear_data:
-	docker-compose down -v
+	docker compose down -v
 
 
 #docker-compose exec web bash

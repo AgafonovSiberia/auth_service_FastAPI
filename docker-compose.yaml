@@ -4,9 +4,9 @@ services:
   web:
     image: web
     build: .
-    #command: uvicorn app.main:app --host 0.0.0.0 --port 9090 --reload
+    command: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 9090 --reload"
     volumes:
-      - .:/app
+      - ./src:/src
     ports:
       - "9090:9090"
     restart: always
@@ -37,19 +37,17 @@ services:
       - '6379:6379'
 
   celery:
-    restart: always
     image: web
-    build:
-      context: .
-    command: celery -A app.services.workflow.celery worker -l info
+    restart: always
+    command: celery -A app.infrastructure.workflow.celery worker -l info
     volumes:
-      - .:/usr/app/app
+     - .:/usr/bot/app
     env_file:
       - dev.env
     depends_on:
       - db
       - redis
-
+#
   dashboard:
     build:
       context: .
