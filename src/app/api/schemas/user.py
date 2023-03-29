@@ -2,6 +2,7 @@
 from typing import Optional, Union
 from pydantic import BaseModel, EmailStr
 from app.api.schemas.validator import PhoneNumber
+from uuid import UUID
 
 
 class UserBase(BaseModel):
@@ -20,7 +21,7 @@ class UserFull(UserBase):
 
 
 class UserFromDB(UserFull):
-	id: Optional[int] = None
+	user_id: Optional[UUID] = None
 
 	class Config:
 		orm_mode = True

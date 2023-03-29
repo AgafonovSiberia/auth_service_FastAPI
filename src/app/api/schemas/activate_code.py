@@ -1,19 +1,21 @@
+from uuid import UUID
+
 from pydantic import BaseModel
 import datetime
 
 
 class CodeBase(BaseModel):
-    code: int | None = None
+    code: str | None = None
     expire: datetime.datetime | None = None
 
 
 class ActivateCode(CodeBase):
-    id: int | None = None
+    id: str | None = None
 
     class Config:
         orm_mode = True
 
 
 class ActivateUser(BaseModel):
-    id: int
-    code: int
+    id: UUID
+    code: str

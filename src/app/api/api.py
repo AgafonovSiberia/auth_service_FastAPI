@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.api.routers import signup
+from app.api.routers import user
 
 
 api_router = APIRouter()
-api_router.include_router(signup.router, tags=["auth"])
+api_router.include_router(user.router, tags=["user"])

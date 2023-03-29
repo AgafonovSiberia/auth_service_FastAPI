@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from .config_reader import config
-from app.api.depends.setup import setup
+from app.api.setup import setup
 from app.infrastructure.db.factory import create_pool
 
 

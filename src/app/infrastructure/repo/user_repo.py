@@ -1,5 +1,5 @@
 import datetime
-
+from uuid import UUID
 from sqlalchemy import select, update, delete
 
 from app.infrastructure.db.models import User, ActivateCode
@@ -15,18 +15,15 @@ class UserRepo(BaseSQLAlchemyRepo):
         :param user_data: src.schemas.user.UserCreate
         :return: src.schemas.user.User
         """
-        user = await self._session.merge(
-            User(
-                full_name=user_data.full_name,
-                login=user_data.login,
-                hashed_password=crypt_password(user_data.password),
-            )
-        )
-
+        new_user = User(full_name=user_data.full_name,
+                        login=user_data.login,
+                        hashed_password=crypt_password(user_data.password))
+        self._session.add(new_user)
         await self._session.commit()
-        return user
+        self._session.refresh(new_user)
+        return new_user
 
-    async def activate_user(self, user_id: int) -> UserFromDB:
+    async def activate_user(self, user_id: UUID) -> UserFromDB:
         user = await self._session.get(User, user_id)
         user.is_active = True
         self._session.add(user)
@@ -34,7 +31,15 @@ class UserRepo(BaseSQLAlchemyRepo):
         self._session.refresh(user)
         return user
 
-    async def get_by_email(self, login: str) -> UserFromDB:
+    async def delete_user(self, user_id: UUID) -> UserFromDB:
+        user = await self._session.get(User, user_id)
+        user.is_active = False
+        self._session.add(user)
+        self._session.commit()
+        self._session.refresh(user)
+        return user
+
+    async def get_user_by_email(self, login: str) -> UserFromDB:
         """
         Get user from database by email
         :param login: логин пользователя (email / номер телефона)
@@ -43,18 +48,19 @@ class UserRepo(BaseSQLAlchemyRepo):
         user = await self._session.execute(select(User).where(User.login == login))
         return user.scalar_one_or_none()
 
-    async def get_by_id(self, user_id: int) -> UserFromDB:
+    async def get_user_by_id(self, user_id: UUID) -> UserFromDB:
         user = await self._session.execute(select(User).where(User.id == user_id))
         return user.scalar_one_or_none()
 
-    async def add_code_activate(self, user_id: int, code_activate: int, expire: int):
+    async def add_code_activate(self, user_id: UUID, code_activate: str, expire: int):
         code = await self._session.merge(
-            ActivateCode(user_id=user_id, code=code_activate, expire=expire)
-        )
+            ActivateCode(user_id=user_id,
+                         code=code_activate,
+                         expire=expire))
         await self._session.commit()
         return code
 
-    async def check_activate_code_by_user_id(self, user_id: int):
+    async def check_activate_code_by_user_id(self, user_id: UUID):
         code = await self._session.execute(
             select(ActivateCode)
             .where(
@@ -74,7 +80,7 @@ class UserRepo(BaseSQLAlchemyRepo):
         )
         await self._session.commit()
 
-    async def check_activate_code_by_code(self, code: int):
+    async def check_activate_code_by_code(self, code: str):
         code = await self._session.execute(
             select(ActivateCode)
             .where(ActivateCode.expire > datetime.datetime.now().timestamp())

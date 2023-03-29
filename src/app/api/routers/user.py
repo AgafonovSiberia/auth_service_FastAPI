@@ -1,4 +1,4 @@
-import datetime
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from app.infrastructure.repo.base import SQLALchemyRepo
@@ -12,11 +12,11 @@ from app.infrastructure.workflow.tasks.periodic import clean_expire_code_activat
 
 from app.config_reader import config
 
-router = APIRouter(prefix="/signup")
+router = APIRouter(prefix="/user")
 
 
 @router.post("/", response_model=UserFromDB)
-async def signup_account(
+async def create_user(
     user_data: UserCreate, repo: SQLALchemyRepo = Depends(get_repo)
 ):
     """
@@ -26,27 +26,36 @@ async def signup_account(
     :param repo: объект Репозитория
     :return: schemas.user.UserFromDB
     """
-    user: UserFromDB = await repo.get_repo(UserRepo).get_by_email(login=user_data.login)
+    user: UserFromDB = await repo.get_repo(UserRepo).get_user_by_email(login=user_data.login)
     if user:
         raise HTTPException(status_code=400,
                             detail="The user with this login already exists")
 
     user: UserFromDB = await repo.get_repo(UserRepo).add_user(user_data=user_data)
+
+    code: ActivateCode = await repo.get_repo(UserRepo).add_code_activate(
+        user_id=user.user_id,
+        code_activate=generate_activate_code(),
+        expire=get_expire_timestamp(config.TTL_CODE_ACTIVATE))
+    send_message_with_code.delay(subject="activate",
+                                 address_to=user.login,
+                                 code=code.code)
+
     return user
 
 
-@router.get("/activate/get_activate_code/{user_id}")
-async def get_activate_code(user_id: int, repo: SQLALchemyRepo = Depends(get_repo)):
+@router.get("/activate/{user_id}")
+async def get_activate_code(user_id: UUID, repo: SQLALchemyRepo = Depends(get_repo)):
     """
     Получение кода активации для подтверждения аккаунта
     :param user_id: ID пользователя
     :param repo: объект Репозитория
     """
-    user: UserFromDB = await repo.get_repo(UserRepo).get_by_id(user_id)
+    user: UserFromDB = await repo.get_repo(UserRepo).get_user_by_id(user_id)
     code: ActivateCode = await repo.get_repo(UserRepo).\
         check_activate_code_by_user_id(user_id)
 
-    if not user or code:
+    if not user or user.is_active or code:
         raise HTTPException(status_code=400,
                             detail="This user is currently"
                                    "unable to receive an activation code")
@@ -64,8 +73,8 @@ async def get_activate_code(user_id: int, repo: SQLALchemyRepo = Depends(get_rep
                         content={"message": "Activation code sent successfully"})
 
 
-@router.post("/activate/", response_model=UserFromDB)
-async def activate_account(
+@router.put("/activate/", response_model=UserFromDB)
+async def activate_user(
         activate_data: ActivateUser, repo: SQLALchemyRepo = Depends(get_repo)):
     """
     Активация пользователя
@@ -74,10 +83,23 @@ async def activate_account(
     :return: schemas.user.UserFromDB
     """
     check_code: ActivateCode = await repo.get_repo(UserRepo).check_activate_code_by_code(activate_data.code)
+    user: UserFromDB = await repo.get_repo(UserRepo).get_user_by_id(activate_data.id)
     if not check_code:
         raise HTTPException(status_code=400, detail="This code has expired")
 
+    if not user:
+        raise HTTPException(status_code=400, detail="This user not found")
+
     user: UserFromDB = await repo.get_repo(UserRepo).activate_user(user_id=activate_data.id)
+
+    return user
+
+
+@router.delete("/delete", response_model=UserFromDB)
+async def delete_user(user_id: UUID, repo: SQLALchemyRepo = Depends(get_repo)):
+    user = await repo.get_repo(UserRepo).delete_user(user_id)
+    if not user:
+        raise HTTPException(status_code=400, detail="This user not found")
 
     return user
 
