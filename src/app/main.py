@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from .config_reader import config
-from app.api import depends
-from app.infrastructure.db.engine import create_pool
+from app.api.depends.setup import setup
+from app.infrastructure.db.factory import create_pool
 
 
 def crate_app():
@@ -15,7 +15,7 @@ def crate_app():
 def init_app():
     current_app: FastAPI = crate_app()
     pool = create_pool()
-    depends.setup(current_app, pool)
+    setup(current_app, pool)
     return current_app
 
 

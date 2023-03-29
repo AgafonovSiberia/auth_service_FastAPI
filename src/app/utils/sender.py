@@ -7,7 +7,10 @@ from email_validator import validate_email, EmailNotValidError
 
 class SMSCodeSender:
     def send_message(self, message):
-        pass
+        ...
+
+    def _set_template(self):
+        ...
 
 
 class EmailCodeSender:
@@ -41,7 +44,6 @@ class CodeSender:
         self.subject = subject
         self.address_to = address_to
         self.code = code
-        print(subject)
 
     def send(self):
         if self._is_email():
@@ -54,7 +56,7 @@ class CodeSender:
             pass
 
     def _get_data_to_email(self):
-        mail_subject, template = ("Ваш аккаунт активирован", "activate.html")\
+        mail_subject, template = ("Подтверждение электронной почты", "temp.html")\
             if self.subject == "activate" else ("Восстановление пароля", "password_reset.html")
         return {"subject": mail_subject, "html_template_name": template}
 

@@ -9,6 +9,7 @@ class Email(BaseModel):
     password: str
     use_tls: bool
 
+    template_path: str
 
 
 class Settings(BaseSettings):

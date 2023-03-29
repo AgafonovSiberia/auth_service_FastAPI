@@ -39,7 +39,7 @@ services:
   celery:
     image: web
     restart: always
-    command: celery -A app.infrastructure.workflow.celery worker -l info
+    command: celery -A app.infrastructure.workflow.worker worker -l info
     volumes:
      - .:/usr/bot/app
     env_file:

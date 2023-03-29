@@ -1,4 +1,4 @@
-from app.infrastructure.workflow.celery import celery
+from app.infrastructure.workflow.worker import celery
 from app.utils.sender import CodeSender
 
 

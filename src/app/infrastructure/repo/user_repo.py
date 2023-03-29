@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update, delete
 
 from app.infrastructure.db.models import User, ActivateCode
 from app.api.schemas.user import UserCreate, UserFromDB
@@ -27,16 +27,11 @@ class UserRepo(BaseSQLAlchemyRepo):
         return user
 
     async def activate_user(self, user_id: int) -> UserFromDB:
-        query = (
-            update(User)
-            .where(User.id == user_id)
-            .values(is_active=True)
-            .returning(User)
-        )
-        user = (
-            select(User).from_statement(query).execution_options(populate_existing=True)
-        )
-        await self._session.commit()
+        user = await self._session.get(User, user_id)
+        user.is_active = True
+        self._session.add(user)
+        self._session.commit()
+        self._session.refresh(user)
         return user
 
     async def get_by_email(self, login: str) -> UserFromDB:
@@ -69,6 +64,15 @@ class UserRepo(BaseSQLAlchemyRepo):
             .where(ActivateCode.user_id == user_id)
         )
         return code.first()
+
+    async def delete_expire_activate_codes(self):
+
+        await self._session.execute(delete(ActivateCode)
+                                    .where(
+            ActivateCode.expire
+            < datetime.datetime.now(tz=datetime.timezone.utc).timestamp())
+        )
+        await self._session.commit()
 
     async def check_activate_code_by_code(self, code: int):
         code = await self._session.execute(
