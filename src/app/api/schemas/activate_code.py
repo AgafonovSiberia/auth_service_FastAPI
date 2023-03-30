@@ -10,12 +10,12 @@ class CodeBase(BaseModel):
 
 
 class ActivateCode(CodeBase):
-    id: str | None = None
+    user_id: UUID | None = None
 
     class Config:
         orm_mode = True
 
 
 class ActivateUser(BaseModel):
-    id: UUID
+    user_id: UUID
     code: str

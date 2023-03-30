@@ -1,17 +1,16 @@
 
 from typing import Optional, Union
 from pydantic import BaseModel, EmailStr
-from app.api.schemas.validator import PhoneNumber
 from uuid import UUID
 
 
 class UserBase(BaseModel):
 	full_name: Optional[str] = None
-	login: Union[EmailStr, PhoneNumber, None] = None
+	login: Union[EmailStr, None] = None
 
 
 class UserCreate(UserBase):
-	login: Union[EmailStr, PhoneNumber, None]
+	login: Union[EmailStr, None]
 	password: str
 
 

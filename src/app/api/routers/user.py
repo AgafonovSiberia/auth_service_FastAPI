@@ -73,6 +73,14 @@ async def get_activate_code(user_id: UUID, repo: SQLALchemyRepo = Depends(get_re
                         content={"message": "Activation code sent successfully"})
 
 
+# @router.get("/check/{user_id}")
+# async def get_activate_code(user_id: UUID, repo: SQLALchemyRepo = Depends(get_repo)):
+#     code = await repo.get_repo(UserRepo).check_activate_code_by_user_id(user_id)
+#     print(code)
+#     print(type(code))
+#     return code
+
+
 @router.put("/activate/", response_model=UserFromDB)
 async def activate_user(
         activate_data: ActivateUser, repo: SQLALchemyRepo = Depends(get_repo)):
@@ -83,14 +91,14 @@ async def activate_user(
     :return: schemas.user.UserFromDB
     """
     check_code: ActivateCode = await repo.get_repo(UserRepo).check_activate_code_by_code(activate_data.code)
-    user: UserFromDB = await repo.get_repo(UserRepo).get_user_by_id(activate_data.id)
+    user: UserFromDB = await repo.get_repo(UserRepo).get_user_by_id(activate_data.user_id)
     if not check_code:
         raise HTTPException(status_code=400, detail="This code has expired")
 
     if not user:
         raise HTTPException(status_code=400, detail="This user not found")
 
-    user: UserFromDB = await repo.get_repo(UserRepo).activate_user(user_id=activate_data.id)
+    user: UserFromDB = await repo.get_repo(UserRepo).activate_user(user_id=activate_data.user_id)
 
     return user
 

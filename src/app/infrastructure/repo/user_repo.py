@@ -20,23 +20,23 @@ class UserRepo(BaseSQLAlchemyRepo):
                         hashed_password=crypt_password(user_data.password))
         self._session.add(new_user)
         await self._session.commit()
-        self._session.refresh(new_user)
+        await self._session.refresh(new_user)
         return new_user
 
     async def activate_user(self, user_id: UUID) -> UserFromDB:
         user = await self._session.get(User, user_id)
         user.is_active = True
         self._session.add(user)
-        self._session.commit()
-        self._session.refresh(user)
+        await self._session.commit()
+        await self._session.refresh(user)
         return user
 
     async def delete_user(self, user_id: UUID) -> UserFromDB:
         user = await self._session.get(User, user_id)
         user.is_active = False
         self._session.add(user)
-        self._session.commit()
-        self._session.refresh(user)
+        await self._session.commit()
+        await self._session.refresh(user)
         return user
 
     async def get_user_by_email(self, login: str) -> UserFromDB:
@@ -49,7 +49,7 @@ class UserRepo(BaseSQLAlchemyRepo):
         return user.scalar_one_or_none()
 
     async def get_user_by_id(self, user_id: UUID) -> UserFromDB:
-        user = await self._session.execute(select(User).where(User.id == user_id))
+        user = await self._session.execute(select(User).where(User.user_id == user_id))
         return user.scalar_one_or_none()
 
     async def add_code_activate(self, user_id: UUID, code_activate: str, expire: int):
@@ -69,12 +69,10 @@ class UserRepo(BaseSQLAlchemyRepo):
             )
             .where(ActivateCode.user_id == user_id)
         )
-        return code.first()
+        return code.scalar_one_or_none()
 
     async def delete_expire_activate_codes(self):
-
-        await self._session.execute(delete(ActivateCode)
-                                    .where(
+        await self._session.execute(delete(ActivateCode).where(
             ActivateCode.expire
             < datetime.datetime.now(tz=datetime.timezone.utc).timestamp())
         )
@@ -86,4 +84,4 @@ class UserRepo(BaseSQLAlchemyRepo):
             .where(ActivateCode.expire > datetime.datetime.now().timestamp())
             .where(ActivateCode.code == code)
         )
-        return code.first()
+        return code.scalar_one_or_none()

@@ -1,17 +1,16 @@
 from typing import AsyncGenerator
-
+from typing import Generator
 import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+from sqlalchemy.orm import close_all_sessions
 import asyncio
-from app.api.schemas.user import UserFromDB, UserCreate
-from app.infrastructure.repo.user_repo import UserRepo
-import os
-from app.utils.security import crypt_password
+
 from app.api.setup import setup
 from app.infrastructure.repo.base import SQLALchemyRepo
+
+pytest_plugins = ('pytest_asyncio',)
 
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
@@ -19,7 +18,9 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     AsyncEngine,
 )
+from sqlalchemy.orm import sessionmaker
 from uuid import UUID
+from app.config_reader import config
 
 DB_TEST_URL = "postgresql+asyncpg://postgres_test:postgres_test@0.0.0.0:5433/postgres_test"
 
@@ -31,71 +32,45 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="session", autouse=True)
-async def run_migrations():
-    os.system("alembic init migrations")
-    os.system('alembic revision --autogenerate -m "test running migrations"')
-    os.system("alembic upgrade heads")
+#
+# @pytest.fixture(scope="session", autouse=True)
+# async def run_migrations():
+#     os.system("alembic init migrations")
+#     os.system('alembic revision --autogenerate -m "test running migrations"')
+#     os.system("alembic upgrade heads")
+
+
+@pytest_asyncio.fixture
+async def session(async_pool: sessionmaker) -> AsyncGenerator[AsyncSession, None]:
+    async with async_pool() as session_:
+        yield session_
 
 
 @pytest.fixture(scope="session")
-async def async_session_test():
-    engine = create_async_engine(DB_TEST_URL, pool_pre_ping=True, echo=True)
-    pool: async_sessionmaker[AsyncSession] = async_sessionmaker(
-        bind=engine,
-        expire_on_commit=False,
-        autoflush=False
+def async_pool() -> Generator[sessionmaker, None, None]:
+    engine = create_async_engine(url=config.POSTGRES_URL)
+    pool_: async_sessionmaker[AsyncSession] = async_sessionmaker(
+        bind=engine, expire_on_commit=False, autoflush=False
     )
+    yield pool_
+    close_all_sessions()
 
-    yield pool
 
-
-@pytest.fixture(scope="session")
-async def get_test_repo():
-    engine = create_async_engine(DB_TEST_URL, pool_pre_ping=True, echo=True)
-    pool: async_sessionmaker[AsyncSession] = async_sessionmaker(
-        bind=engine,
-        expire_on_commit=False,
-        autoflush=False
-    )
-    async with pool() as _session:
+@pytest_asyncio.fixture(scope="session")
+async def repo(async_pool: Generator[sessionmaker, None, None]) -> SQLALchemyRepo:
+    async with async_pool() as _session:
         yield SQLALchemyRepo(_session)
 
 
 @pytest.fixture(scope="session")
-def test_app(pool: async_sessionmaker[AsyncSession]) -> FastAPI:
-    app = FastAPI
-    setup(app=app, pool=pool)
+def test_app(async_pool: async_sessionmaker[AsyncSession]) -> FastAPI:
+    app = FastAPI()
+    setup(app=app, pool=async_pool)
     return app
 
 
-
-@pytest.mark.anyio
+@pytest.mark.asyncio
 @pytest_asyncio.fixture(scope="session")
-async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
-    async with AsyncClient(app=app, base_url="http://test") as test_client:
+async def client(test_app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
+    async with AsyncClient(app=test_app, base_url="http://test") as test_client:
         yield test_client
-
-
-@pytest.fixture
-async def get_user_from_database(get_test_repo):
-    async def get_user_from_database_by_uuid(user_id: UUID):
-        user: UserFromDB = await get_test_repo.get_repo(UserRepo).get_user_by_id()
-        return user
-
-    return get_user_from_database_by_uuid()
-
-
-@pytest.fixture
-async def create_user_in_database(get_test_repo):
-    async def create_user_in_database(
-        full_name: str,
-        login: str,
-        password: str,
-    ):
-        user: UserFromDB = await get_test_repo.get_repo(UserRepo).add_user(
-            UserCreate(full_name=full_name, login=login, password=crypt_password(password))
-        )
-
-    return create_user_in_database
-
