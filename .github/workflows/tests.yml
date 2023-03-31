@@ -1,7 +1,8 @@
 name: Lint and check types
 
 on: [push, pull_request]
-
+env:
+  POETRY_HOME: /opt/poetry
 jobs:
   test:
     runs-on: ubuntu-latest
