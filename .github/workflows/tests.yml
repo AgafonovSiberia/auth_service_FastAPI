@@ -52,11 +52,9 @@ jobs:
     - name: Project Run
       run: docker compose --env-file dev.env up -d
 
-    - name: Check running containers
-      run: docker ps -a
 
     - name: Check logs
-      run: docker logs web
+      run: docker compose logs web
 
     - name: tests run
       run: |
