@@ -1,7 +1,6 @@
 from abc import ABC
 
 from app.infrastructure.db.factory import create_pool
-from app.infrastructure.repo.base import SQLALchemyRepo
 import asyncio
 from functools import wraps
 from celery import Task
