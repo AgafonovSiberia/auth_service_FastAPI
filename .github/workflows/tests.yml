@@ -49,6 +49,6 @@ jobs:
 
     - name: Test with pytest
       run: |
-        docker compose --enf-file .dev.env up   --build
+        docker compose --env-file .dev.env up   --build
         docker compose exec web bash
         pytest -v -s
