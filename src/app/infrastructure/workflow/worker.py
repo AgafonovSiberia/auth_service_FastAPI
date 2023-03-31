@@ -7,8 +7,8 @@ celery = Celery(
     broker=config.REDIS_URL,
     backend=config.REDIS_URL,
     include=[
-        "app.infrastructure.workflows.tasks.send_tasks",
-        "app.infrastructure.workflows.tasks.periodic",
+        "app.infrastructure.workflow.tasks.send_tasks",
+        "app.infrastructure.workflow.tasks.periodic",
     ],
 )
 

@@ -37,7 +37,7 @@ def event_loop():
 @pytest.fixture(scope="session")
 def postgres_url() -> Generator[str, None, None]:
     postgres = PostgresContainer("postgres:15.1")
-    if os.name == "nt":  # TODO workaround from testcontainers/testcontainers-python#108
+    if os.name == "nt":
         postgres.get_container_host_ip = lambda: "localhost"
     try:
         postgres.start()
@@ -49,6 +49,7 @@ def postgres_url() -> Generator[str, None, None]:
 
 @pytest.fixture(scope="session")
 def alembic_config(postgres_url: str) -> Config:
+    print(postgres_url)
     alembic_cfg = Config("./alembic.ini")
     alembic_cfg.set_main_option("script_location", "./migrations")
     alembic_cfg.set_main_option("sqlalchemy.url", postgres_url)
