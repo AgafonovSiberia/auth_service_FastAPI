@@ -43,6 +43,7 @@ jobs:
       with:
         envkey_EMAIL__LOGIN: ${{ secrets.EMAIL_LOGIN }}
         envkey_EMAIL__PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        envkey_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         file_name: dev.env
         fail_on_empty: false
 

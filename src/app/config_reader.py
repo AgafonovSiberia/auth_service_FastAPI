@@ -43,7 +43,7 @@ class Settings(BaseSettings):
             port=f"{values.get('POSTGRES_PORT') or ''}",
         )
 
-    REDIS_HOST: str = Field(default="127.0.0.1")
+    REDIS_HOST: str = Field(default="redis")
     REDIS_PORT: int = Field(default=6379)
 
     REDIS_URL: Optional[RedisDsn] = None
