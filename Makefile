@@ -1,6 +1,9 @@
 run:
 	docker compose up --build
 
+run_test:
+	docker compose exec web pytest -v
+
 stop:
 	docker compose stop
 

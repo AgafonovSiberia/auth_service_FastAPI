@@ -38,7 +38,7 @@ services:
     image: redis
     restart: always
     ports:
-      - '6379:6379'
+      - "6379:6379"
 
   celery:
     image: web
@@ -61,7 +61,7 @@ services:
     env_file:
       - dev.env
     ports:
-      - 5555:5555
+      - "5555:5555"
     depends_on:
       - web
       - redis

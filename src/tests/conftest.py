@@ -6,8 +6,6 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.orm import close_all_sessions
 import asyncio
-import os
-from testcontainers.postgres import PostgresContainer
 from app.api.setup import setup
 from app.infrastructure.repo.base import SQLALchemyRepo
 
@@ -20,9 +18,6 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import sessionmaker
 from app.config_reader import config
 
-from alembic.config import Config
-from alembic.command import upgrade
-
 
 pytest_plugins = ("pytest_asyncio",)
 
@@ -34,31 +29,33 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="session")
-def postgres_url() -> Generator[str, None, None]:
-    postgres = PostgresContainer("postgres:15.1", password="civiclaeu3")
-    if os.name == "nt":
-        postgres.get_container_host_ip = lambda: "localhost"
-    try:
-        postgres.start()
-        postgres_url_ = postgres.get_connection_url().replace("psycopg2", "asyncpg")
-        yield postgres_url_
-    finally:
-        postgres.stop()
-
-
-@pytest.fixture(scope="session")
-def alembic_config(postgres_url: str) -> Config:
-    print(postgres_url)
-    alembic_cfg = Config("./alembic.ini")
-    alembic_cfg.set_main_option("script_location", "./migrations")
-    alembic_cfg.set_main_option("sqlalchemy.url", postgres_url)
-    return alembic_cfg
-
-
-@pytest.fixture(scope="session", autouse=True)
-def upgrade_schema_db(alembic_config: Config):
-    upgrade(alembic_config, "head")
+#
+# @pytest.fixture(scope="session")
+# def postgres_url() -> Generator[str, None, None]:
+#     postgres = PostgresContainer("postgres:11")
+#
+#     if os.name == "nt":
+#         postgres.get_container_host_ip = lambda: "localhost"
+#     try:
+#         postgres.start()
+#         postgres_url_ = postgres.get_connection_url().replace("psycopg2", "asyncpg")
+#         yield postgres_url_
+#     finally:
+#         postgres.stop()
+#
+#
+# @pytest.fixture(scope="session")
+# def alembic_config(postgres_url: str) -> Config:
+#     alembic_cfg = Config("./alembic.ini")
+#     alembic_cfg.set_main_option("script_location", "./migrations")
+#     alembic_cfg.set_main_option("sqlalchemy.url", postgres_url)
+#     print(alembic_cfg.get_main_option("sqlalchemy.url"))
+#     return alembic_cfg
+#
+#
+# @pytest.fixture(scope="session", autouse=True)
+# def upgrade_schema_db(alembic_config: Config):
+#     upgrade(alembic_config, "head")
 
 
 @pytest.fixture(scope="session")
