@@ -11,9 +11,9 @@ from fastapi.exception_handlers import HTTP_422_UNPROCESSABLE_ENTITY
 
 @pytest.mark.asyncio
 async def test_create_user(client: AsyncClient, repo: SQLALchemyRepo):
-    user = UserCreate(full_name="Ivan",
-                      login=generate_random_email(),
-                      password=generate_random_password())
+    user = UserCreate(
+        full_name="Ivan", login=generate_random_email(), password=generate_random_password()
+    )
 
     resp = await client.post("/user/", data=json.dumps(user.dict()))
 
@@ -33,15 +33,17 @@ async def test_create_user(client: AsyncClient, repo: SQLALchemyRepo):
 
 @pytest.mark.asyncio
 async def test_activate_user(client: AsyncClient, repo: SQLALchemyRepo):
-    user = UserCreate(full_name="Ivan",
-                      login=generate_random_email(),
-                      password=generate_random_password())
+    user = UserCreate(
+        full_name="Ivan", login=generate_random_email(), password=generate_random_password()
+    )
 
     resp = await client.post("/user/", data=json.dumps(user.dict()))
     user_response: UserFromDB = UserFromDB.parse_obj(resp.json())
     assert resp.status_code == 200
 
-    code: ActivateCode = await repo.get_repo(UserRepo).check_activate_code_by_user_id(user_response.user_id)
+    code: ActivateCode = await repo.get_repo(UserRepo).check_activate_code_by_user_id(
+        user_response.user_id
+    )
     activate_user: ActivateUser = ActivateUser(user_id=code.user_id, code=code.code)
     resp = await client.put("/user/activate/", data=activate_user.json())
     user: UserFromDB = UserFromDB.parse_obj(resp.json())
@@ -53,9 +55,9 @@ async def test_activate_user(client: AsyncClient, repo: SQLALchemyRepo):
 
 @pytest.mark.asyncio
 async def test_user_already_exists(client: AsyncClient):
-    user = UserCreate(full_name="Ivan",
-                      login=generate_random_email(),
-                      password=generate_random_password())
+    user = UserCreate(
+        full_name="Ivan", login=generate_random_email(), password=generate_random_password()
+    )
 
     await client.post("/user/", data=json.dumps(user.dict()))
     resp = await client.post("/user/", data=json.dumps(user.dict()))
@@ -65,9 +67,7 @@ async def test_user_already_exists(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_not_valid_password(client: AsyncClient):
-    user = {"full_name": "Ivan",
-            "login": "user@mail.ru",
-            "password": "short"}
+    user = {"full_name": "Ivan", "login": "user@mail.ru", "password": "short"}
 
     resp = await client.post("/user/", data=json.dumps(user))
     assert resp.status_code == HTTP_422_UNPROCESSABLE_ENTITY
@@ -75,34 +75,11 @@ async def test_not_valid_password(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_not_valid_email(client: AsyncClient):
-    user = {"full_name": "Ivan",
-            "login": "some_not_valid_email",
-            "password": generate_random_password()}
+    user = {
+        "full_name": "Ivan",
+        "login": "some_not_valid_email",
+        "password": generate_random_password(),
+    }
 
     resp = await client.post("/user/", data=json.dumps(user))
     assert resp.status_code == HTTP_422_UNPROCESSABLE_ENTITY
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

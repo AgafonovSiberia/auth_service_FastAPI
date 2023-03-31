@@ -8,5 +8,6 @@ def generate_activate_code() -> int:
 
 
 def get_expire_timestamp(timeout: int):
-    return (datetime.datetime.now(tz=datetime.timezone.utc)
-            + datetime.timedelta(seconds=timeout)).timestamp()
+    return (
+        datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(seconds=timeout)
+    ).timestamp()

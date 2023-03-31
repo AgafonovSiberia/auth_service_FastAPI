@@ -1,4 +1,3 @@
-
 import re
 from pydantic.validators import strict_str_validator
 
@@ -11,7 +10,7 @@ class PhoneNumber(str):
 
     @classmethod
     def validate(cls, v: str):
-        v = v.strip().replace(' ', '')
+        v = v.strip().replace(" ", "")
 
         regex = r"^(\+)[1-9][0-9\-\(\)\.]{9,15}$"
         if v and not re.search(regex, v, re.I):

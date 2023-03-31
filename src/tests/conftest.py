@@ -72,7 +72,6 @@ def async_pool() -> Generator[sessionmaker, None, None]:
 
 @pytest_asyncio.fixture(scope="session")
 async def session(async_pool: sessionmaker) -> AsyncGenerator[AsyncSession, None]:
-
     async with async_pool() as _session:
         yield _session
         _session.rollback()

@@ -6,7 +6,3 @@ from app.utils.sender import CodeSender
 def send_message_with_code(subject: str, address_to: str, code: int):
     sender = CodeSender(subject=subject, address_to=address_to, code=code)
     sender.send()
-
-
-
-

@@ -1,7 +1,4 @@
-from app.infrastructure.repo.user_repo import UserRepo
-from app.infrastructure.repo.base import SQLALchemyRepo
-
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 

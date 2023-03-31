@@ -1,6 +1,6 @@
 import datetime
 from uuid import UUID
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, delete
 
 from app.infrastructure.db.models import User, ActivateCode
 from app.api.schemas.user import UserCreate, UserFromDB
@@ -15,9 +15,11 @@ class UserRepo(BaseSQLAlchemyRepo):
         :param user_data: src.schemas.user.UserCreate
         :return: src.schemas.user.User
         """
-        new_user = User(full_name=user_data.full_name,
-                        login=user_data.login,
-                        hashed_password=crypt_password(user_data.password))
+        new_user = User(
+            full_name=user_data.full_name,
+            login=user_data.login,
+            hashed_password=crypt_password(user_data.password),
+        )
         self._session.add(new_user)
         await self._session.commit()
         await self._session.refresh(new_user)
@@ -54,9 +56,8 @@ class UserRepo(BaseSQLAlchemyRepo):
 
     async def add_code_activate(self, user_id: UUID, code_activate: str, expire: int):
         code = await self._session.merge(
-            ActivateCode(user_id=user_id,
-                         code=code_activate,
-                         expire=expire))
+            ActivateCode(user_id=user_id, code=code_activate, expire=expire)
+        )
         await self._session.commit()
         return code
 
@@ -64,17 +65,17 @@ class UserRepo(BaseSQLAlchemyRepo):
         code = await self._session.execute(
             select(ActivateCode)
             .where(
-                ActivateCode.expire
-                > datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
+                ActivateCode.expire > datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
             )
             .where(ActivateCode.user_id == user_id)
         )
         return code.scalar_one_or_none()
 
     async def delete_expire_activate_codes(self):
-        await self._session.execute(delete(ActivateCode).where(
-            ActivateCode.expire
-            < datetime.datetime.now(tz=datetime.timezone.utc).timestamp())
+        await self._session.execute(
+            delete(ActivateCode).where(
+                ActivateCode.expire < datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
+            )
         )
         await self._session.commit()
 

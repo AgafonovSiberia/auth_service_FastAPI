@@ -16,9 +16,7 @@ router = APIRouter(prefix="/user")
 
 
 @router.post("/", response_model=UserFromDB)
-async def create_user(
-    user_data: UserCreate, repo: SQLALchemyRepo = Depends(get_repo)
-):
+async def create_user(user_data: UserCreate, repo: SQLALchemyRepo = Depends(get_repo)):
     """
     Регистрация нового пользователя
 
@@ -28,18 +26,16 @@ async def create_user(
     """
     user: UserFromDB = await repo.get_repo(UserRepo).get_user_by_email(login=user_data.login)
     if user:
-        raise HTTPException(status_code=400,
-                            detail="The user with this login already exists")
+        raise HTTPException(status_code=400, detail="The user with this login already exists")
 
     user: UserFromDB = await repo.get_repo(UserRepo).add_user(user_data=user_data)
 
     code: ActivateCode = await repo.get_repo(UserRepo).add_code_activate(
         user_id=user.user_id,
         code_activate=generate_activate_code(),
-        expire=get_expire_timestamp(config.TTL_CODE_ACTIVATE))
-    send_message_with_code.delay(subject="activate",
-                                 address_to=user.login,
-                                 code=code.code)
+        expire=get_expire_timestamp(config.TTL_CODE_ACTIVATE),
+    )
+    send_message_with_code.delay(subject="activate", address_to=user.login, code=code.code)
 
     return user
 
@@ -52,25 +48,22 @@ async def get_activate_code(user_id: UUID, repo: SQLALchemyRepo = Depends(get_re
     :param repo: объект Репозитория
     """
     user: UserFromDB = await repo.get_repo(UserRepo).get_user_by_id(user_id)
-    code: ActivateCode = await repo.get_repo(UserRepo).\
-        check_activate_code_by_user_id(user_id)
+    code: ActivateCode = await repo.get_repo(UserRepo).check_activate_code_by_user_id(user_id)
 
     if not user or user.is_active or code:
-        raise HTTPException(status_code=400,
-                            detail="This user is currently"
-                                   "unable to receive an activation code")
+        raise HTTPException(
+            status_code=400, detail="This user is currently" "unable to receive an activation code"
+        )
 
     code: ActivateCode = await repo.get_repo(UserRepo).add_code_activate(
         user_id=user_id,
         code_activate=generate_activate_code(),
-        expire=get_expire_timestamp(config.TTL_CODE_ACTIVATE))
+        expire=get_expire_timestamp(config.TTL_CODE_ACTIVATE),
+    )
 
-    send_message_with_code.delay(subject="activate",
-                                 address_to=user.login,
-                                 code=code.code)
+    send_message_with_code.delay(subject="activate", address_to=user.login, code=code.code)
 
-    return JSONResponse(status_code=200,
-                        content={"message": "Activation code sent successfully"})
+    return JSONResponse(status_code=200, content={"message": "Activation code sent successfully"})
 
 
 # @router.get("/check/{user_id}")
@@ -82,15 +75,16 @@ async def get_activate_code(user_id: UUID, repo: SQLALchemyRepo = Depends(get_re
 
 
 @router.put("/activate/", response_model=UserFromDB)
-async def activate_user(
-        activate_data: ActivateUser, repo: SQLALchemyRepo = Depends(get_repo)):
+async def activate_user(activate_data: ActivateUser, repo: SQLALchemyRepo = Depends(get_repo)):
     """
     Активация пользователя
     :param activate_data: модель (id, activate_code)
     :param repo: объект Репозитория
     :return: schemas.user.UserFromDB
     """
-    check_code: ActivateCode = await repo.get_repo(UserRepo).check_activate_code_by_code(activate_data.code)
+    check_code: ActivateCode = await repo.get_repo(UserRepo).check_activate_code_by_code(
+        activate_data.code
+    )
     user: UserFromDB = await repo.get_repo(UserRepo).get_user_by_id(activate_data.user_id)
     if not check_code:
         raise HTTPException(status_code=400, detail="This code has expired")
@@ -116,4 +110,3 @@ async def delete_user(user_id: UUID, repo: SQLALchemyRepo = Depends(get_repo)):
 async def delete_expire_codes():
     """Только для тестирования"""
     clean_expire_code_activate.delay()
-
