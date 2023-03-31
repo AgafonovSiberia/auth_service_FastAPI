@@ -36,7 +36,7 @@ def event_loop():
 
 @pytest.fixture(scope="session")
 def postgres_url() -> Generator[str, None, None]:
-    postgres = PostgresContainer("postgres:15.1")
+    postgres = PostgresContainer("postgres:15.1", password="civiclaeu3")
     if os.name == "nt":
         postgres.get_container_host_ip = lambda: "localhost"
     try:
