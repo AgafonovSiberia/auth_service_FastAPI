@@ -49,8 +49,10 @@ jobs:
         file_name: dev.env
         fail_on_empty: false
 
-    - name: Test with pytest
+    - name: Project Run
       run: |
         docker compose --env-file dev.env up --build
+
+    - name: tests run
         docker compose exec web bash
         pytest -v -s
