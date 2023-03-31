@@ -48,6 +48,6 @@ jobs:
 
     - name: Test with pytest
       run: |
-        docker compose --env-file /github/workspace/env/dev.env up   --build
+        docker compose --env-file /github/workspace/dev.env up   --build
         docker compose exec web bash
         pytest -v -s
