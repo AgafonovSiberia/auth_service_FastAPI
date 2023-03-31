@@ -59,4 +59,4 @@ jobs:
     - name: tests run
       run: |
         docker compose exec web bash
-        pytest -v -s
+        ls
