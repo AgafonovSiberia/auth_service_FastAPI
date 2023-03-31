@@ -41,6 +41,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        docker compose up --env EMAIL__LOGIN=${{ secrets.EMAIL_LOGIN }} EMAIL__PASSWORD=${{ secrets.EMAIL_PASSWORD }} --build
+        EMAIL__LOGIN=${{ secrets.EMAIL_LOGIN }} EMAIL__PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+        docker compose up --build
         docker compose exec web bash
         pytest -v -s
