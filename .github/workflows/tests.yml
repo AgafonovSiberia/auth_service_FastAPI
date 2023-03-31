@@ -54,5 +54,6 @@ jobs:
         docker compose --env-file dev.env up --build
 
     - name: tests run
+      run: |
         docker compose exec web bash
         pytest -v -s
