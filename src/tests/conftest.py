@@ -11,21 +11,20 @@ from testcontainers.postgres import PostgresContainer
 from app.api.setup import setup
 from app.infrastructure.repo.base import SQLALchemyRepo
 
-pytest_plugins = ('pytest_asyncio',)
 
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     AsyncSession,
     async_sessionmaker,
-    AsyncEngine,
 )
 from sqlalchemy.orm import sessionmaker
-from uuid import UUID
 from app.config_reader import config
 
 from alembic.config import Config
 from alembic.command import upgrade
 
+
+pytest_plugins = ("pytest_asyncio",)
 
 
 @pytest.fixture(scope="session")
@@ -47,10 +46,10 @@ def postgres_url() -> Generator[str, None, None]:
     finally:
         postgres.stop()
 
+
 @pytest.fixture(scope="session")
 def alembic_config(postgres_url: str) -> Config:
     alembic_cfg = Config("./alembic.ini")
-    print(os.getcwd())
     alembic_cfg.set_main_option("script_location", "./migrations")
     alembic_cfg.set_main_option("sqlalchemy.url", postgres_url)
     return alembic_cfg
