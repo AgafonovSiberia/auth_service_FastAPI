@@ -50,8 +50,13 @@ jobs:
         fail_on_empty: false
 
     - name: Project Run
-      run: |
-        docker compose --env-file dev.env up --build
+      run: docker compose --env-file dev.env up -d
+
+    - name: Check running containers
+      run: docker ps -a
+
+    - name: Check logs
+      run: docker logs web
 
     - name: tests run
       run: |
