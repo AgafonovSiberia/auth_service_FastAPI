@@ -57,6 +57,4 @@ jobs:
       run: docker compose logs web
 
     - name: tests run
-      run: |
-        docker compose exec web bash
-        ls
+      run: docker compose exec web pytest -v -s
