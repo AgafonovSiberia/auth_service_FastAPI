@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from app.api.depends.db import DBGateway
 from app.api.api import api_router
+
 from app.api.depends.db import get_repo
 
 

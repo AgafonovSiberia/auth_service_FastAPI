@@ -6,7 +6,8 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.orm import close_all_sessions
 import asyncio
-
+import os
+from testcontainers.postgres import PostgresContainer
 from app.api.setup import setup
 from app.infrastructure.repo.base import SQLALchemyRepo
 
@@ -22,7 +23,9 @@ from sqlalchemy.orm import sessionmaker
 from uuid import UUID
 from app.config_reader import config
 
-DB_TEST_URL = "postgresql+asyncpg://postgres_test:postgres_test@0.0.0.0:5433/postgres_test"
+from alembic.config import Config
+from alembic.command import upgrade
+
 
 
 @pytest.fixture(scope="session")
@@ -32,18 +35,30 @@ def event_loop():
     loop.close()
 
 
-#
-# @pytest.fixture(scope="session", autouse=True)
-# async def run_migrations():
-#     os.system("alembic init migrations")
-#     os.system('alembic revision --autogenerate -m "test running migrations"')
-#     os.system("alembic upgrade heads")
+@pytest.fixture(scope="session")
+def postgres_url() -> Generator[str, None, None]:
+    postgres = PostgresContainer("postgres:15.1")
+    if os.name == "nt":  # TODO workaround from testcontainers/testcontainers-python#108
+        postgres.get_container_host_ip = lambda: "localhost"
+    try:
+        postgres.start()
+        postgres_url_ = postgres.get_connection_url().replace("psycopg2", "asyncpg")
+        yield postgres_url_
+    finally:
+        postgres.stop()
+
+@pytest.fixture(scope="session")
+def alembic_config(postgres_url: str) -> Config:
+    alembic_cfg = Config("./alembic.ini")
+    print(os.getcwd())
+    alembic_cfg.set_main_option("script_location", "./migrations")
+    alembic_cfg.set_main_option("sqlalchemy.url", postgres_url)
+    return alembic_cfg
 
 
-@pytest_asyncio.fixture
-async def session(async_pool: sessionmaker) -> AsyncGenerator[AsyncSession, None]:
-    async with async_pool() as session_:
-        yield session_
+@pytest.fixture(scope="session", autouse=True)
+def upgrade_schema_db(alembic_config: Config):
+    upgrade(alembic_config, "head")
 
 
 @pytest.fixture(scope="session")
@@ -54,6 +69,16 @@ def async_pool() -> Generator[sessionmaker, None, None]:
     )
     yield pool_
     close_all_sessions()
+
+
+@pytest_asyncio.fixture(scope="session")
+async def session(async_pool: sessionmaker) -> AsyncGenerator[AsyncSession, None]:
+
+    async with async_pool() as _session:
+        yield _session
+        _session.rollback()
+
+    _session.close()
 
 
 @pytest_asyncio.fixture(scope="session")

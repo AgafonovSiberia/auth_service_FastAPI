@@ -1,17 +1,17 @@
 
 from typing import Optional, Union
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from uuid import UUID
 
 
 class UserBase(BaseModel):
 	full_name: Optional[str] = None
-	login: Union[EmailStr, None] = None
+	login: EmailStr = None
 
 
 class UserCreate(UserBase):
-	login: Union[EmailStr, None]
-	password: str
+	login: EmailStr
+	password: str = Field(min_length=8)
 
 
 class UserFull(UserBase):

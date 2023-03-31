@@ -1,0 +1,42 @@
+name: Lint and check types
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install poetry
+      run: |
+        python3 -m venv $POETRY_HOME
+        $POETRY_HOME/bin/pip install poetry==1.4.0
+
+    - name: Validate the structure of the pyproject.toml
+      run: |
+        poetry check
+
+    - name: Verify that poetry.lock is consistent with pyproject.toml
+      run: |
+        poetry lock --check
+
+    - name: Install dependencies
+      run: |
+         $POETRY_HOME/bin/poetry install --with test
+
+    - name: Check code formatting by black
+      run: |
+        poetry run black . --check
+
+    - name: Lint code by ruff
+      run: |
+        poetry run ruff .
+
+    - name: Test with pytest
+      run: |
+        $POETRY_HOME/bin/poetry run pytest
