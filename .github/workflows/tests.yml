@@ -20,11 +20,11 @@ jobs:
 
     - name: Validate the structure of the pyproject.toml
       run: |
-        poetry check
+         $POETRY_HOME/bin/poetry check
 
     - name: Verify that poetry.lock is consistent with pyproject.toml
       run: |
-        poetry lock --check
+         $POETRY_HOME/bin/poetry lock --check
 
     - name: Install dependencies
       run: |
@@ -32,11 +32,11 @@ jobs:
 
     - name: Check code formatting by black
       run: |
-        poetry run black . --check
+        $POETRY_HOME/bin/poetry run black . --check
 
     - name: Lint code by ruff
       run: |
-        poetry run ruff .
+        $POETRY_HOME/bin/poetry run ruff .
 
     - name: Test with pytest
       run: |
