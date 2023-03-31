@@ -38,9 +38,17 @@ jobs:
       run: |
         $POETRY_HOME/bin/poetry run ruff .
 
+    - name: Make envfile
+      uses: SpicyPizza/create-envfile@v1.3
+      with:
+        envkey_EMAIL__LOGIN: ${{ secrets.EMAIL_LOGIN }}
+        envkey_EMAIL__PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        directory: .
+        file_name: dev.env
+        fail_on_empty: false
+
     - name: Test with pytest
       run: |
-        make run
+        docker compose --enf-file .dev.env up   --build
         docker compose exec web bash
         pytest -v -s
-#        $POETRY_HOME/bin/poetry run pytest

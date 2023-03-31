@@ -3,13 +3,13 @@ from pydantic import BaseModel, BaseSettings, Field, PostgresDsn, RedisDsn, vali
 
 
 class Email(BaseModel):
-    host: str
-    port: int
+    host: str = Field(default="smtp.yandex.ru")
+    port: int = Field(default=587)
     login: str
     password: str
-    use_tls: bool
+    use_tls: bool = Field(default=True)
 
-    template_path: str
+    template_path: str = Field(default="./app/templates")
 
 
 class Settings(BaseSettings):
