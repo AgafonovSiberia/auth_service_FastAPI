@@ -43,12 +43,12 @@ jobs:
       with:
         envkey_EMAIL__LOGIN: ${{ secrets.EMAIL_LOGIN }}
         envkey_EMAIL__PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-        directory: .
+        directory: env/
         file_name: dev.env
         fail_on_empty: false
 
     - name: Test with pytest
       run: |
-        docker compose --env-file .dev.env up   --build
+        docker compose --env-file /github/workspace/env/dev.env up   --build
         docker compose exec web bash
         pytest -v -s
