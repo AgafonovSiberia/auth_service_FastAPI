@@ -1,16 +1,17 @@
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
+
+from app.api.depends.db import get_repo
+from app.api.schemas.activate_code import ActivateCode, ActivateUser
+from app.api.schemas.user import UserCreate, UserFromDB
+from app.config_reader import config
 from app.infrastructure.repo.base import SQLALchemyRepo
 from app.infrastructure.repo.user_repo import UserRepo
-from app.api.schemas.user import UserCreate, UserFromDB
-from app.api.schemas.activate_code import ActivateCode, ActivateUser
-from app.api.depends.db import get_repo
-from app.utils.activate_code import generate_activate_code, get_expire_timestamp
 from app.infrastructure.workflow.tasks import send_message_with_code
 from app.infrastructure.workflow.tasks.periodic import clean_expire_code_activate
-
-from app.config_reader import config
+from app.utils.activate_code import generate_activate_code, get_expire_timestamp
 
 router = APIRouter(prefix="/user")
 
@@ -35,6 +36,7 @@ async def create_user(user_data: UserCreate, repo: SQLALchemyRepo = Depends(get_
         code_activate=generate_activate_code(),
         expire=get_expire_timestamp(config.TTL_CODE_ACTIVATE),
     )
+
     send_message_with_code.delay(subject="activate", address_to=user.login, code=code.code)
 
     return user

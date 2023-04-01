@@ -1,10 +1,11 @@
+import asyncio
 from abc import ABC
+from functools import wraps
+
+from celery import Task
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.infrastructure.db.factory import create_pool
-import asyncio
-from functools import wraps
-from celery import Task
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
 
 class DatabaseTask(Task, ABC):

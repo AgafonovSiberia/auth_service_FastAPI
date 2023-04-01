@@ -1,15 +1,19 @@
 import json
+
 import pytest
-from app.infrastructure.repo.user_repo import UserRepo
-from app.api.schemas.user import UserFromDB, UserCreate
-from app.api.schemas.activate_code import ActivateCode, ActivateUser
-from tests.utils import generate_random_email, generate_random_password
-from app.infrastructure.repo.base import SQLALchemyRepo
-from httpx import AsyncClient
 from fastapi.exception_handlers import HTTP_422_UNPROCESSABLE_ENTITY
+from httpx import AsyncClient
+from mock import AsyncMock, patch
+
+from app.api.schemas.activate_code import ActivateCode, ActivateUser
+from app.api.schemas.user import UserCreate, UserFromDB
+from app.infrastructure.repo.base import SQLALchemyRepo
+from app.infrastructure.repo.user_repo import UserRepo
+from tests.utils import generate_random_email, generate_random_password
 
 
 @pytest.mark.asyncio
+@patch("app.api.routers.user.send_message_with_code.delay", new=AsyncMock)
 async def test_create_user(client: AsyncClient, repo: SQLALchemyRepo):
     user = UserCreate(
         full_name="Ivan", login=generate_random_email(), password=generate_random_password()
@@ -32,7 +36,9 @@ async def test_create_user(client: AsyncClient, repo: SQLALchemyRepo):
 
 
 @pytest.mark.asyncio
+@patch("app.api.routers.user.send_message_with_code.delay", new=AsyncMock)
 async def test_activate_user(client: AsyncClient, repo: SQLALchemyRepo):
+
     user = UserCreate(
         full_name="Ivan", login=generate_random_email(), password=generate_random_password()
     )
@@ -54,6 +60,7 @@ async def test_activate_user(client: AsyncClient, repo: SQLALchemyRepo):
 
 
 @pytest.mark.asyncio
+@patch("app.api.routers.user.send_message_with_code.delay", new=AsyncMock)
 async def test_user_already_exists(client: AsyncClient):
     user = UserCreate(
         full_name="Ivan", login=generate_random_email(), password=generate_random_password()
@@ -67,7 +74,7 @@ async def test_user_already_exists(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_not_valid_password(client: AsyncClient):
-    user = {"full_name": "Ivan", "login": "user@mail.ru", "password": "short"}
+    user = {"full_name": "Ivan", "login": generate_random_email(), "password": "short"}
 
     resp = await client.post("/user/", data=json.dumps(user))
     assert resp.status_code == HTTP_422_UNPROCESSABLE_ENTITY

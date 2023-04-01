@@ -15,11 +15,19 @@ services:
       - dev.env
     depends_on:
       - db
+      - celery
+#    links:
+#      - db
+#      - celery
+#      - redis
+#      - dashboard
     deploy:
       mode: replicated
       replicas: 1
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+
 
   db:
     image: postgres:15.1
@@ -63,7 +71,6 @@ services:
     ports:
       - "5555:5555"
     depends_on:
-      - web
       - redis
       - celery
 
