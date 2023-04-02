@@ -511,7 +511,7 @@ MANIFEST
 *.manifest
 *.spec
 
-# Installer logs
+# Installer files
 pip-log.txt
 pip-delete-this-directory.txt
 
