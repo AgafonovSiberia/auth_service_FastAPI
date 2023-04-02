@@ -7,3 +7,7 @@ router = APIRouter(prefix="/healthcheck")
 @router.get("/")
 async def health_check():
     return JSONResponse(status_code=200, content={})
+
+
+def func():
+    ...
