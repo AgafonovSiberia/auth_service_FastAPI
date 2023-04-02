@@ -1,6 +1,11 @@
 FROM python:3.11-buster as builder
 ENV VIRTUAL_ENV=/opt/venv
 ENV CODE_PATH=/src
+
+ENV PYTHONFAULTHANDLER=1 \
+    PYTHONHASHSEED=random \
+    PYTHONUNBUFFERED=1
+
 RUN pip3 install --no-cache-dir poetry==1.4.0
 RUN python3 -m venv $VIRTUAL_ENV
 WORKDIR $CODE_PATH
