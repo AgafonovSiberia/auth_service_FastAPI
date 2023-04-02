@@ -59,8 +59,8 @@ jobs:
       run: docker compose --env-file dev.env up -d
 
 
-    - name: Check files
-      run: docker compose files web
+    - name: Check logs
+      run: docker compose logs web
 
     - name: tests run
       run: docker compose exec web pytest -v -s
