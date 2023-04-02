@@ -1,4 +1,5 @@
-from typing import Optional, Any, Dict
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel, BaseSettings, Field, PostgresDsn, RedisDsn, validator
 
 
@@ -16,7 +17,7 @@ class Settings(BaseSettings):
     email: Email
 
     API_V1_URL: str = "/api/v1"
-
+    SECRET_KEY: str = Field(default="dqwefrve2")
     POSTGRES_USER: str = Field(default="admin")
     POSTGRES_PASSWORD: str = Field(default="admin")
     POSTGRES_DB: str = Field(default="service")

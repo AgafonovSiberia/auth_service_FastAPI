@@ -1,10 +1,11 @@
 import datetime
 from uuid import UUID
-from sqlalchemy import select, delete
 
-from app.infrastructure.db.models import User, ActivateCode
+from sqlalchemy import delete, select
+from utils.security.hashed import crypt_password
+
 from app.api.schemas.user import UserCreate, UserFromDB
-from app.utils.security import crypt_password
+from app.infrastructure.db.models import ActivateCode, User
 from app.infrastructure.repo.base.base import BaseSQLAlchemyRepo
 
 

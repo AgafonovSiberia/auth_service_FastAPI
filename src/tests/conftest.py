@@ -69,12 +69,11 @@ async def session(async_pool: sessionmaker) -> AsyncGenerator[AsyncSession, None
     async with async_pool() as _session:
         yield _session
         await _session.rollback()
-        await _session.close()
+        _session.close
 
 
 @pytest_asyncio.fixture(scope="session")
 async def repo(session: AsyncGenerator[AsyncSession, None]) -> SQLALchemyRepo:
-    # async with async_pool() as _session:
     yield SQLALchemyRepo(session)
 
 
