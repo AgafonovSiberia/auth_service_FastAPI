@@ -3,9 +3,10 @@ from calendar import timegm
 from uuid import UUID
 
 import jwt
-from config_reader import config
 from jwt import ExpiredSignatureError, InvalidSignatureError
-from utils.uuid import UUIDEncoder
+
+from app.config_reader import config
+from app.utils.uuid import UUIDEncoder
 
 TTL_AT = config.TTL_ACCESS_TOKEN
 TTL_RT = config.TTL_REFRESH_TOKEN
