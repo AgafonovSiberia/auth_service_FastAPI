@@ -2,6 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
+from utils.security.activate_code import generate_activate_code, get_expire_timestamp
 
 from app.api.depends.db import get_repo
 from app.api.schemas.activate_code import ActivateCode, ActivateUser
@@ -11,7 +12,6 @@ from app.infrastructure.repo.base import SQLALchemyRepo
 from app.infrastructure.repo.user_repo import UserRepo
 from app.infrastructure.workflow.tasks import send_message_with_code
 from app.infrastructure.workflow.tasks.periodic import clean_expire_code_activate
-from app.utils.activate_code import generate_activate_code, get_expire_timestamp
 
 router = APIRouter(prefix="/user")
 

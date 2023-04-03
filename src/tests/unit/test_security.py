@@ -11,10 +11,16 @@ from app.utils.security.jwt import check_token, create_token
 from tests.utils import generate_random_password
 
 
-def test_password_hashed():
+def test_password_hashed_ok():
     some_password = generate_random_password()
     hashed_password = crypt_password(some_password)
     assert check_password(some_password, hashed_password) is True
+
+
+def test_password_hashed_not_valid():
+    some_password = generate_random_password()
+    with pytest.raises(ValueError):
+        check_password(some_password, generate_random_password().encode("utf-8"))
 
 
 def test_valid_token():
