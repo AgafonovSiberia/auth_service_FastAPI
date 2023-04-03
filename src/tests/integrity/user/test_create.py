@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from fastapi import status
 from fastapi.exception_handlers import HTTP_422_UNPROCESSABLE_ENTITY
 from httpx import AsyncClient
 from mock import AsyncMock, patch
@@ -22,7 +23,7 @@ async def test_create_user(client: AsyncClient, repo: SQLALchemyRepo):
     resp = await client.post("/user/", data=json.dumps(user.dict()))
 
     user_response: UserFromDB = UserFromDB.parse_obj(resp.json())
-    assert resp.status_code == 200
+    assert resp.status_code == status.HTTP_201_CREATED
     assert user.full_name == user_response.full_name
     assert user.login == user_response.login
     assert user_response.is_active is False
@@ -44,7 +45,7 @@ async def test_activate_user(client: AsyncClient, repo: SQLALchemyRepo):
 
     resp = await client.post("/user/", data=json.dumps(user.dict()))
     user_response: UserFromDB = UserFromDB.parse_obj(resp.json())
-    assert resp.status_code == 200
+    assert resp.status_code == status.HTTP_201_CREATED
 
     code: ActivateCode = await repo.get_repo(UserRepo).check_activate_code_by_user_id(
         user_response.user_id
