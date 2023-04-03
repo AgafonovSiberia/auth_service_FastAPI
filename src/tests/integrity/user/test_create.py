@@ -38,7 +38,6 @@ async def test_create_user(client: AsyncClient, repo: SQLALchemyRepo):
 @pytest.mark.asyncio
 @patch("app.api.routers.user.send_message_with_code.delay", new=AsyncMock)
 async def test_activate_user(client: AsyncClient, repo: SQLALchemyRepo):
-
     user = UserCreate(
         full_name="Ivan", login=generate_random_email(), password=generate_random_password()
     )
