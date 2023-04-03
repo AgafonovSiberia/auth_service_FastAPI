@@ -1,7 +1,9 @@
-from sqlalchemy import Column, BigInteger, Text, Float, Integer, Boolean, LargeBinary
-from app.infrastructure.db.base import Base
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
+
+from sqlalchemy import BigInteger, Boolean, Column, Float, Integer, LargeBinary, Text
+from sqlalchemy.dialects.postgresql import UUID
+
+from app.infrastructure.db.base import Base
 
 
 class User(Base):

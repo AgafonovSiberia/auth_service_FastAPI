@@ -5,9 +5,9 @@ from calendar import timegm
 
 import jwt.exceptions
 import pytest
-from utils.security.hashed import check_password, crypt_password
-from utils.security.jwt import check_token, create_token
 
+from app.utils.security.hashed import check_password, crypt_password
+from app.utils.security.jwt import check_token, create_token
 from tests.utils import generate_random_password
 
 
@@ -33,7 +33,7 @@ async def test_expire_token():
         ).utctimetuple()
     )
     token, exp = create_token(user_id, "access", exp=test_exp)
-    print(token)
+
     await asyncio.sleep(1)
     check = check_token(token, leeway=0)
     assert check.get("status") == "error"

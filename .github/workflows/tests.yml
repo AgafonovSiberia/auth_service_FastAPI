@@ -27,9 +27,9 @@ jobs:
          $POETRY_HOME/bin/poetry lock --check
 
 
-#    - name: Isort
-#    - run: |
-#       $POETRY_HOME/bin/poetry isort --profile black .
+    - name: Isort
+    - run: |
+       $POETRY_HOME/bin/poetry isort --profile black .
            
 
     - name: Install dependencies

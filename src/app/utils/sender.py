@@ -1,8 +1,9 @@
-from redmail import EmailSender
-from app.config_reader import config
 import re
 
-from email_validator import validate_email, EmailNotValidError
+from email_validator import EmailNotValidError, validate_email
+from redmail import EmailSender
+
+from app.config_reader import config
 
 
 class SMSCodeSender:

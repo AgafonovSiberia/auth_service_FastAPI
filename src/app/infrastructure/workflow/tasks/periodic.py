@@ -1,9 +1,10 @@
-from app.infrastructure.workflow.worker import celery
-from app.infrastructure.repo.user_repo import UserRepo
-from app.infrastructure.workflow.utils import DatabaseTask, asyncio_celery_task_runner
 from celery.app import task
 from celery.schedules import crontab
+
 from app.infrastructure.repo.base import SQLALchemyRepo
+from app.infrastructure.repo.user_repo import UserRepo
+from app.infrastructure.workflow.utils import DatabaseTask, asyncio_celery_task_runner
+from app.infrastructure.workflow.worker import celery
 
 
 @celery.on_after_finalize.connect

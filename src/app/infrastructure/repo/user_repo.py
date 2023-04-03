@@ -2,11 +2,11 @@ import datetime
 from uuid import UUID
 
 from sqlalchemy import delete, select
-from utils.security.hashed import crypt_password
 
 from app.api.schemas.user import UserCreate, UserFromDB
 from app.infrastructure.db.models import ActivateCode, User
 from app.infrastructure.repo.base.base import BaseSQLAlchemyRepo
+from app.utils.security.hashed import crypt_password
 
 
 class UserRepo(BaseSQLAlchemyRepo):

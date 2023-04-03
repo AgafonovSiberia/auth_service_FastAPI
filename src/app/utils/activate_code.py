@@ -1,5 +1,5 @@
-import random
 import datetime
+import random
 
 
 def generate_activate_code() -> int:

@@ -1,9 +1,9 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from functools import lru_cache
 from typing import Type, TypeVar
 
-from app.infrastructure.repo.base.base import BaseSQLAlchemyRepo
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.infrastructure.repo.base.base import BaseSQLAlchemyRepo
 
 T = TypeVar("T", bound=BaseSQLAlchemyRepo)
 

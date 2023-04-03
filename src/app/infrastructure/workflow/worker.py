@@ -1,6 +1,6 @@
 from celery import Celery
-from app.config_reader import config
 
+from app.config_reader import config
 
 celery = Celery(
     "web",

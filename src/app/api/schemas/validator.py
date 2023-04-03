@@ -1,4 +1,5 @@
 import re
+
 from pydantic.validators import strict_str_validator
 
 
