@@ -32,7 +32,7 @@ jobs:
 
     - name: Isort
       run: |
-        $POETRY_HOME/bin/poetry isort --profile black .
+        $POETRY_HOME/bin/poetry run isort --profile black .
 
     - name: Check code formatting by black
       run: |
