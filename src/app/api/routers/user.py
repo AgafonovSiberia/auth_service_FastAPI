@@ -1,8 +1,7 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import JSONResponse
-from utils.security.activate_code import generate_activate_code, get_expire_timestamp
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse, Response
 
 from app.api.depends.db import get_repo
 from app.api.schemas.activate_code import ActivateCode, ActivateUser
@@ -12,12 +11,20 @@ from app.infrastructure.repo.base import SQLALchemyRepo
 from app.infrastructure.repo.user_repo import UserRepo
 from app.infrastructure.workflow.tasks import send_message_with_code
 from app.infrastructure.workflow.tasks.periodic import clean_expire_code_activate
+from app.utils.security.activate_code import (
+    generate_activate_code,
+    get_expire_timestamp,
+)
 
 router = APIRouter(prefix="/user")
 
 
 @router.post("/", response_model=UserFromDB)
-async def create_user(user_data: UserCreate, repo: SQLALchemyRepo = Depends(get_repo)):
+async def create_user(
+    user_data: UserCreate,
+    response: Response,
+    repo: SQLALchemyRepo = Depends(get_repo),
+):
     """
     Регистрация нового пользователя
 
@@ -27,7 +34,10 @@ async def create_user(user_data: UserCreate, repo: SQLALchemyRepo = Depends(get_
     """
     user: UserFromDB = await repo.get_repo(UserRepo).get_user_by_email(login=user_data.login)
     if user:
-        raise HTTPException(status_code=400, detail="The user with this login already exists")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The user with this login already exists",
+        )
 
     user: UserFromDB = await repo.get_repo(UserRepo).add_user(user_data=user_data)
 
@@ -36,7 +46,7 @@ async def create_user(user_data: UserCreate, repo: SQLALchemyRepo = Depends(get_
         code_activate=generate_activate_code(),
         expire=get_expire_timestamp(config.TTL_CODE_ACTIVATE),
     )
-
+    response.status_code = status.HTTP_201_CREATED
     send_message_with_code.delay(subject="activate", address_to=user.login, code=code.code)
 
     return user
